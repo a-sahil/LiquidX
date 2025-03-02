@@ -17,6 +17,7 @@ import OpenAI from "openai";
 import DLMM from "@meteora-ag/dlmm";
 import cron from 'node-cron';
 import axios from "axios";
+import express from "express";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ interface SessionData {
 interface MyContext extends Context {
   session: SessionData;
 }
+
 // Ensure TELEGRAM_BOT_TOKEN exists
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -667,8 +669,8 @@ const portfolioHandler = async (ctx: any) => {
     const { usdcBalance, solBalance } = await fetchPoolTokenBalances(poolAddress);
     console.log("Raw pool balances:", { usdcBalance, solBalance });
     const adjustedPositionBalanceUSDC = usdcBalance / 10 ** 6; // Adjust for USDC decimals
-const adjustedPositionBalanceSOL = solBalance / 10 ** 9; // Adjust for SOL decimals
-console.log("Pool balances:", adjustedPositionBalanceUSDC, adjustedPositionBalanceSOL);
+    const adjustedPositionBalanceSOL = solBalance / 10 ** 9; // Adjust for SOL decimals
+    console.log("Pool balances:", adjustedPositionBalanceUSDC, adjustedPositionBalanceSOL);
 
     // Fetch claimed fees from Meteora API (force fresh fetch)
     const earningUrl = `https://dlmm-api.meteora.ag/wallet/${wallet.publicKey}/${poolAddress}/earning`;
@@ -1037,4 +1039,44 @@ bot.on("text", async (ctx: any) => {
 });
 
 bot.action("wallet", walletHandler);
-bot.launch().then(() => console.log("Telegram bot is running..."));
+
+// Add Express server for Cloud Run compatibility
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json()); // Parse JSON for Telegram webhook
+
+const webhookPath = `/telegraf/${bot.secretPathComponent()}`;
+app.post(webhookPath, (req, res) => {
+  bot.handleUpdate(req.body, res); // Handle Telegram webhook updates
+});
+
+// Health check endpoint for Cloud Run
+app.get('/', (req, res) => {
+  res.status(200).send('Cleopetra Bot is running!');
+});
+
+// Start the bot with conditional webhook or polling
+async function startBot() {
+  if (process.env.WEBHOOK_URL) {
+    // Webhook mode for Cloud Run
+    const webhookUrl = `${process.env.WEBHOOK_URL}${webhookPath}`;
+    try {
+      await bot.telegram.setWebhook(webhookUrl);
+      console.log(`Webhook set to ${webhookUrl}`);
+      
+      app.listen(PORT, () => {
+        console.log(`Bot server running on port ${PORT} in webhook mode`);
+      });
+    } catch (error) {
+      console.error("Failed to set webhook:", error);
+      process.exit(1);
+    }
+  } else {
+    // Polling mode for local development
+    console.log("WEBHOOK_URL not set, starting bot in polling mode");
+    bot.launch().then(() => console.log("Bot started in polling mode"));
+  }
+}
+
+startBot();
