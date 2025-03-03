@@ -1041,52 +1041,48 @@ bot.on("text", async (ctx: any) => {
 bot.action("wallet", walletHandler);
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 8080; // Default to 8080 if PORT is undefined
 console.log(`Starting Cleopetra Bot server on port ${port}`);
-app.use(express.json()); // Parse JSON for Telegram webhook
+app.use(express.json());
 
-// Relative webhook path for handling updates locally
 const secretPath = `/telegraf/${bot.secretPathComponent()}`;
-
-// Webhook endpoint for handling updates (local path)
 app.post(secretPath, (req: Request, res: Response) => {
-  bot.handleUpdate(req.body, res); // Handle Telegram webhook updates
+  bot.handleUpdate(req.body, res);
   res.status(200).send('Webhook received');
 });
 
-// Health check endpoint for Cloud Run
 app.get('/', (req: Request, res: Response) => {
   res.status(200).send('Cleopetra Bot is running!');
 });
-// Dedicated health check endpoint for Cloud Run
+
 app.get('/health', (req, res) => {
   res.status(200).send('Healthy');
 });
-// Start the bot with conditional webhook or polling
+
+// Start the server immediately
+app.listen(port, () => {
+  console.log(`Bot server running on port ${port}`);
+});
+
+// Handle bot startup separately
 async function startBot() {
-  const webhookUrl = "https://torq-47126403796.us-central1.run.app"
+  const webhookUrl = "https://torq-47126403796.us-central1.run.app";
 
   if (webhookUrl) {
-    // Webhook mode for Cloud Run
     try {
       await bot.telegram.setWebhook(webhookUrl);
       console.log(`Webhook set to ${webhookUrl}`);
-
-      // app.listen(port, () => {
-      //   console.log(`Bot server running on port ${port} in webhook mode`);
-      // });
     } catch (error) {
       console.error('Failed to set webhook:', error);
-      process.exit(1);
+      console.log('Falling back to polling mode');
+      bot.launch().then(() => console.log('Bot started in polling mode'));
     }
   } else {
-    // Polling mode for local development
     console.log('WEBHOOK_URL not set, starting bot in polling mode');
     bot.launch().then(() => console.log('Bot started in polling mode'));
   }
-  app.listen(port, () => {
-    console.log(`Bot server running on port ${port} `);
-  });
 }
 
-startBot();
+startBot().catch((error) => {
+  console.error('Bot startup failed:', error);
+});
