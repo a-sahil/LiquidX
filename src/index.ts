@@ -1043,7 +1043,7 @@ bot.action("wallet", walletHandler);
 
 // Add Express server for Cloud Run compatibility
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json()); // Parse JSON for Telegram webhook
 
@@ -1070,8 +1070,8 @@ async function startBot() {
       await bot.telegram.setWebhook(webhookUrl);
       console.log(`Webhook set to ${webhookUrl}`);
 
-      app.listen(PORT, () => {
-        console.log(`Bot server running on port ${PORT} in webhook mode`);
+      app.listen(port, () => {
+        console.log(`Bot server running on port ${port} in webhook mode`);
       });
     } catch (error) {
       console.error('Failed to set webhook:', error);
