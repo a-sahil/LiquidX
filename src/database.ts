@@ -1,4 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 // Define the interface for Wallet document
 interface IWallet extends Document {
@@ -32,7 +35,12 @@ export const Wallet = mongoose.model<IWallet>('Wallet', walletSchema);
 
 // Connect to MongoDB
 try {
-  mongoose.connect('mongodb://localhost:27017/solana_bot')
+  const mongoUri = process.env.MONGODB_URI;
+  if (!mongoUri) {
+    throw new Error('MONGODB_URI is not defined');
+  }
+
+  mongoose.connect(mongoUri)
     .then(() => console.log('Connected to MongoDB'))
     .catch((error) => console.error('MongoDB connection error:', error));
 } catch (error) {

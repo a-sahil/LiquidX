@@ -1040,19 +1040,18 @@ bot.on("text", async (ctx: any) => {
 
 bot.action("wallet", walletHandler);
 
-
-// Add Express server for Cloud Run compatibility
 const app = express();
 const port = process.env.PORT || 8443 || 3000 || 8000 || 8080;
 console.log(`Starting Cleopetra Bot server on port ${port}`);
 app.use(express.json()); // Parse JSON for Telegram webhook
 
-// Generate a secure webhook path
-const webhookPath = `/telegraf/${bot.secretPathComponent()}`;
+// Relative webhook path for handling updates locally
+const secretPath = `/telegraf/${bot.secretPathComponent()}`;
 
-// Webhook endpoint for handling updates
-app.post(webhookPath, (req: Request, res: Response) => {
+// Webhook endpoint for handling updates (local path)
+app.post(secretPath, (req: Request, res: Response) => {
   bot.handleUpdate(req.body, res); // Handle Telegram webhook updates
+  res.status(200).send('Webhook received');
 });
 
 // Health check endpoint for Cloud Run
@@ -1062,7 +1061,7 @@ app.get('/', (req: Request, res: Response) => {
 
 // Start the bot with conditional webhook or polling
 async function startBot() {
-  const webhookUrl = process.env.WEBHOOK_URL ? `${process.env.WEBHOOK_URL}${webhookPath}` : null;
+  const webhookUrl = process.env.WEBHOOK_URL ? `https://${process.env.WEBHOOK_URL}${secretPath}` : null;
 
   if (webhookUrl) {
     // Webhook mode for Cloud Run

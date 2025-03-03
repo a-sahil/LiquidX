@@ -1,8 +1,8 @@
-import fetch from "node-fetch";
+import axios from "axios";
 import { Connection, PublicKey, Keypair, sendAndConfirmTransaction } from "@solana/web3.js";
 import OpenAI from "openai";
-import  DLMM  from "@meteora-ag/dlmm";
-import  {StrategyType}  from "@meteora-ag/dlmm";
+import DLMM from "@meteora-ag/dlmm";
+import { StrategyType } from "@meteora-ag/dlmm";
 import { BN } from "@coral-xyz/anchor";
 import dotenv from 'dotenv';
 dotenv.config();
@@ -103,11 +103,8 @@ class MeteoraService {
 
   async getOptimalPool(tokenSymbol: string): Promise<PoolInfo> {
     try {
-      const response = await fetch(this.apiUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch pools: ${response.statusText}`);
-      }
-      const pools = (await response.json()) as any[];
+      const response = await axios.get(this.apiUrl);
+      const pools = response.data as any[];
 
       const tokenPools = pools.filter((pool) => {
         const poolName = pool.name?.toUpperCase();
@@ -120,12 +117,8 @@ class MeteoraService {
 
       const bestPool = await this.findBestPoolWithOpenAI(tokenPools);
 
-      const detailsResponse = await fetch(`https://dlmm-api.meteora.ag/pair/${bestPool.address}`);
-      if (!detailsResponse.ok) {
-        throw new Error(`Failed to fetch pool details: ${detailsResponse.statusText}`);
-      }
-
-      const poolDetails = await detailsResponse.json() as {
+      const detailsResponse = await axios.get(`https://dlmm-api.meteora.ag/pair/${bestPool.address}`);
+      const poolDetails = detailsResponse.data as {
         name: string;
         address: string;
         bin_step: number;
@@ -317,8 +310,8 @@ class MeteoraService {
   }
 
   async getAllPools(): Promise<any[]> {
-    const response = await fetch(this.apiUrl);
-    return (await response.json()) as any[];
+    const response = await axios.get(this.apiUrl);
+    return response.data as any[];
   }
 }
 
