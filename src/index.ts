@@ -1064,7 +1064,7 @@ app.get('/health', (req, res) => {
 });
 // Start the bot with conditional webhook or polling
 async function startBot() {
-  const webhookUrl = process.env.WEBHOOK_URL ? `https://${process.env.WEBHOOK_URL}${secretPath}` : null;
+  const webhookUrl = "https://torq-47126403796.us-central1.run.app"
 
   if (webhookUrl) {
     // Webhook mode for Cloud Run
