@@ -1041,7 +1041,7 @@ bot.on("text", async (ctx: any) => {
 bot.action("wallet", walletHandler);
 
 const app = express();
-const port = process.env.PORT || 8443 || 3000 || 8000 || 8080;
+const port = process.env.PORT;
 console.log(`Starting Cleopetra Bot server on port ${port}`);
 app.use(express.json()); // Parse JSON for Telegram webhook
 
