@@ -1068,7 +1068,7 @@ app.listen(port, () => {
 
 // Handle bot startup separately
 async function startBot() {
-  const webhookUrl = "https://torq-47126403796.us-central1.run.app";
+  const webhookUrl = `https://torq-47126403796.us-central1.run.app${secretPath}`;
 
   if (webhookUrl) {
     try {
