@@ -13,5 +13,9 @@ RUN npm install
 # Copy the entire project
 COPY . . 
 
+ENV PORT = 8080
+
+EXPOSE 8080
+
 # Command to run the bot
 CMD ["npm", "run", "start"]
