@@ -17,7 +17,7 @@ import OpenAI from "openai";
 import DLMM from "@meteora-ag/dlmm";
 import cron from 'node-cron';
 import axios from "axios";
-import express from "express";
+import express, { Request, Response } from 'express';
 
 dotenv.config();
 
@@ -1040,42 +1040,47 @@ bot.on("text", async (ctx: any) => {
 
 bot.action("wallet", walletHandler);
 
+
 // Add Express server for Cloud Run compatibility
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json()); // Parse JSON for Telegram webhook
 
+// Generate a secure webhook path
 const webhookPath = `/telegraf/${bot.secretPathComponent()}`;
-app.post(webhookPath, (req, res) => {
+
+// Webhook endpoint for handling updates
+app.post(webhookPath, (req: Request, res: Response) => {
   bot.handleUpdate(req.body, res); // Handle Telegram webhook updates
 });
 
 // Health check endpoint for Cloud Run
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.status(200).send('Cleopetra Bot is running!');
 });
 
 // Start the bot with conditional webhook or polling
 async function startBot() {
-  if (process.env.WEBHOOK_URL) {
+  const webhookUrl = process.env.WEBHOOK_URL ? `${process.env.WEBHOOK_URL}${webhookPath}` : null;
+
+  if (webhookUrl) {
     // Webhook mode for Cloud Run
-    const webhookUrl = `${process.env.WEBHOOK_URL}${webhookPath}`;
     try {
       await bot.telegram.setWebhook(webhookUrl);
       console.log(`Webhook set to ${webhookUrl}`);
-      
+
       app.listen(PORT, () => {
         console.log(`Bot server running on port ${PORT} in webhook mode`);
       });
     } catch (error) {
-      console.error("Failed to set webhook:", error);
+      console.error('Failed to set webhook:', error);
       process.exit(1);
     }
   } else {
     // Polling mode for local development
-    console.log("WEBHOOK_URL not set, starting bot in polling mode");
-    bot.launch().then(() => console.log("Bot started in polling mode"));
+    console.log('WEBHOOK_URL not set, starting bot in polling mode');
+    bot.launch().then(() => console.log('Bot started in polling mode'));
   }
 }
 
