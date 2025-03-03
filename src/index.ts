@@ -267,13 +267,13 @@ bot.command("start", async (ctx) => {
       await wallet.save();
 
       await ctx.reply(
-        `Welcome to Cleopetra: the easiest way to LP on Solana DEXes!\n\n` +
+        `Welcome to torq: the easiest way to LP on Solana DEXes!\n\n` +
           `👛 Your new wallet has been created:\n${wallet.publicKey}\n\n` +
           `Get started by depositing SOL and selecting options below:`,
         getMainKeyboard()
       );
     } else {
-      await ctx.reply("Welcome back to Cleopetra!", getMainKeyboard());
+      await ctx.reply("Welcome back to torq!", getMainKeyboard());
     }
   } catch (error) {
     console.error("Start command error:", error);
@@ -366,7 +366,7 @@ const settingsHandler = async (ctx: any) => {
 };
 
 const helpHandler = async (ctx: any) => {
-  const helpMessage = `Welcome to Cleopetra Bot! 🚀
+  const helpMessage = `Welcome to torq Bot! 🚀
 Available Commands:
 /start - Return to main menu
 /open_position - Create new LP position
@@ -589,7 +589,7 @@ bot.action(/create_position_(.+)_(.+)_(.+)/, async (ctx: any) => {
         `Pool: ${poolInfo.Pool}`,
         `Position ID: ${position.positionId}`,
         `Amount X: ${usdcAmount.toFixed(6)} ${token}`,
-        `Amount Y: ${solAmount.toFixed(9)} SOL`,
+        `Amount Y: ${solAmount.toFixed(6)} SOL`,
         `Active Bin: ${position.positionDetails.activeBin.binId}`,
         `Current Price: $${Number(position.positionDetails.activeBin.pricePerToken).toFixed(4)}`,
         `Bin Range: ${position.positionDetails.binRange.minBinId} to ${position.positionDetails.binRange.maxBinId}`,
@@ -1043,7 +1043,7 @@ bot.action("wallet", walletHandler);
 
 const app = express();
 const port = Number(process.env.PORT);
-console.log(`Starting Cleopetra Bot server on port ${port}`);
+console.log(`Starting torq Bot server on port ${port}`);
 app.use(express.json());
 app.use(cors());
 
@@ -1055,7 +1055,7 @@ app.post(secretPath, (req: Request, res: Response) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  res.status(200).send('Cleopetra Bot is running!');
+  res.status(200).send('torq Bot is running!');
 });
 
 app.get('/health', (req, res) => {
