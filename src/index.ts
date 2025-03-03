@@ -18,6 +18,7 @@ import DLMM from "@meteora-ag/dlmm";
 import cron from 'node-cron';
 import axios from "axios";
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -1044,6 +1045,7 @@ const app = express();
 const port = process.env.PORT || 8080; // Default to 8080 if PORT is undefined
 console.log(`Starting Cleopetra Bot server on port ${port}`);
 app.use(express.json());
+app.use(cors());
 
 const secretPath = `/telegraf/${bot.secretPathComponent()}`;
 app.post(secretPath, (req: Request, res: Response) => {
