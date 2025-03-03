@@ -1043,7 +1043,7 @@ bot.action("wallet", walletHandler);
 
 // Add Express server for Cloud Run compatibility
 const app = express();
-const port = process.env.PORT || 8443;
+const port = process.env.PORT || 8443 || 3000 || 8000 || 8080;
 console.log(`Starting Cleopetra Bot server on port ${port}`);
 app.use(express.json()); // Parse JSON for Telegram webhook
 
