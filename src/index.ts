@@ -1042,13 +1042,14 @@ bot.on("text", async (ctx: any) => {
 bot.action("wallet", walletHandler);
 
 const app = express();
-const port = process.env.PORT || 8080; // Default to 8080 if PORT is undefined
+const port = Number(process.env.PORT);
 console.log(`Starting Cleopetra Bot server on port ${port}`);
 app.use(express.json());
 app.use(cors());
 
 const secretPath = `/telegraf/${bot.secretPathComponent()}`;
 app.post(secretPath, (req: Request, res: Response) => {
+  console.log('Received Telegram update:', req.body); // Log incoming updates
   bot.handleUpdate(req.body, res);
   res.status(200).send('Webhook received');
 });
@@ -1061,30 +1062,53 @@ app.get('/health', (req, res) => {
   res.status(200).send('Healthy');
 });
 
-// Start the server immediately
-app.listen(port, () => {
+// Start the server and ensure it binds to all interfaces (required for Cloud Run)
+app.listen(port, '0.0.0.0', () => {
   console.log(`Bot server running on port ${port}`);
+  startBot().catch((error) => {
+    console.error('Bot startup failed:', error);
+    process.exit(1); // Exit with error code to signal failure to Cloud Run
+  });
 });
 
 // Handle bot startup separately
 async function startBot() {
   const webhookUrl = `https://torq-47126403796.us-central1.run.app${secretPath}`;
+  console.log(`Attempting to set webhook to: ${webhookUrl}`);
 
-  if (webhookUrl) {
-    try {
-      await bot.telegram.setWebhook(webhookUrl);
-      console.log(`Webhook set to ${webhookUrl}`);
-    } catch (error) {
-      console.error('Failed to set webhook:', error);
-      console.log('Falling back to polling mode');
-      bot.launch().then(() => console.log('Bot started in polling mode'));
+  try {
+    await bot.telegram.setWebhook(webhookUrl);
+    console.log(`Webhook successfully set to ${webhookUrl}`);
+    // Verify webhook status
+    const webhookInfo = await bot.telegram.getWebhookInfo();
+    console.log('Webhook info:', JSON.stringify(webhookInfo, null, 2));
+    if (!webhookInfo.url) {
+      throw new Error('Webhook URL not set in Telegram');
     }
-  } else {
-    console.log('WEBHOOK_URL not set, starting bot in polling mode');
-    bot.launch().then(() => console.log('Bot started in polling mode'));
+  } catch (error) {
+    console.error('Failed to set webhook:', error);
+    // In production, we don’t fall back to polling; instead, fail explicitly
+    throw error; // This will trigger process.exit(1) in the catch block above
   }
 }
 
-startBot().catch((error) => {
-  console.error('Bot startup failed:', error);
+// Handle termination signals gracefully
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully');
+  // Cleanup if needed (e.g., stop cron jobs)
+  rebalancingProcesses.forEach((process, userId) => {
+    console.log(`Stopping rebalancing for user ${userId}`);
+    process.cronJob.stop();
+  });
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully');
+  // Cleanup if needed
+  rebalancingProcesses.forEach((process, userId) => {
+    console.log(`Stopping rebalancing for user ${userId}`);
+    process.cronJob.stop();
+  });
+  process.exit(0);
 });
