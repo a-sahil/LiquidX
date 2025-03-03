@@ -1072,9 +1072,9 @@ async function startBot() {
       await bot.telegram.setWebhook(webhookUrl);
       console.log(`Webhook set to ${webhookUrl}`);
 
-      app.listen(port, () => {
-        console.log(`Bot server running on port ${port} in webhook mode`);
-      });
+      // app.listen(port, () => {
+      //   console.log(`Bot server running on port ${port} in webhook mode`);
+      // });
     } catch (error) {
       console.error('Failed to set webhook:', error);
       process.exit(1);
@@ -1084,6 +1084,9 @@ async function startBot() {
     console.log('WEBHOOK_URL not set, starting bot in polling mode');
     bot.launch().then(() => console.log('Bot started in polling mode'));
   }
+  app.listen(port, () => {
+    console.log(`Bot server running on port ${port} `);
+  });
 }
 
 startBot();
