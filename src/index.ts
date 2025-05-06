@@ -267,13 +267,13 @@ bot.command("start", async (ctx) => {
       await wallet.save();
 
       await ctx.reply(
-        `Welcome to torq: the easiest way to LP on Solana DEXes!\n\n` +
+        `Welcome to LiquidX: the easiest way to LP on Solana DEXes!\n\n` +
           `👛 Your new wallet has been created:\n${wallet.publicKey}\n\n` +
           `Get started by depositing SOL and selecting options below:`,
         getMainKeyboard()
       );
     } else {
-      await ctx.reply("Welcome back to torq!", getMainKeyboard());
+      await ctx.reply("Welcome back to LiquidX!", getMainKeyboard());
     }
   } catch (error) {
     console.error("Start command error:", error);
@@ -366,7 +366,7 @@ const settingsHandler = async (ctx: any) => {
 };
 
 const helpHandler = async (ctx: any) => {
-  const helpMessage = `Welcome to torq Bot! 🚀
+  const helpMessage = `Welcome to LiquidX Bot! 🚀
 Available Commands:
 /start - Return to main menu
 /open_position - Create new LP position
@@ -1043,7 +1043,7 @@ bot.action("wallet", walletHandler);
 
 const app = express();
 const port = Number(process.env.PORT);
-console.log(`Starting torq Bot server on port ${port}`);
+console.log(`Starting LiquidX Bot server on port ${port}`);
 app.use(express.json());
 app.use(cors());
 
@@ -1055,7 +1055,7 @@ app.post(secretPath, (req: Request, res: Response) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  res.status(200).send('torq Bot is running!');
+  res.status(200).send('LiquidX Bot is running!');
 });
 
 app.get('/health', (req, res) => {
@@ -1073,7 +1073,7 @@ app.listen(port, '0.0.0.0', () => {
 
 // Handle bot startup separately
 async function startBot() {
-  const webhookUrl = `https://torq-47126403796.us-central1.run.app${secretPath}`;
+  const webhookUrl = `https://LiquidX-47126403796.us-central1.run.app${secretPath}`;
   console.log(`Attempting to set webhook to: ${webhookUrl}`);
 
   try {
