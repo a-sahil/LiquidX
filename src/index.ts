@@ -19,8 +19,23 @@ import cron from 'node-cron';
 import axios from "axios";
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import { SolanaAgentKit, createVercelAITools, KeypairWallet } from "solana-agent-kit"; 
+import DefiPlugin from "@solana-agent-kit/plugin-defi";
 
 dotenv.config();
+
+// Initialize with private key and optional RPC URL
+const agent = new SolanaAgentKit(
+  wallet,
+  process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com",
+  {
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  }
+) // Add the plugins you would like to use
+  .use(DefiPlugin)
+
+// Create LangChain tools
+const tools = createVercelAITools(agent, agent.actions);
 
 // Initialize OpenAI
 const openai = new OpenAI({
