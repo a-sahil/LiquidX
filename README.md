@@ -15,7 +15,9 @@ Enter a token, pick an LP strategy of your choice, and create the position — t
 
 *   `/start` - Begin your LP journey with CleopetraBot.
 *   `/analyze` - Get market analysis and insights.
-*   `/position` - View and manage your LP positions (corresponds to `/portfolio` in current code).
+*   `/open_position` - View and manage your LP positions (corresponds to `/portfolio` in current code).
+*   `/wallet` - Access wallet features.
+*   `/portfolio` - View your positions.
 *   `/optimize` - Get suggestions and execute optimizations for your positions.
 *   `/alerts` - Set custom alerts for market movements or position status.
 *   `/help` - Get a full list of commands and how to use them.
